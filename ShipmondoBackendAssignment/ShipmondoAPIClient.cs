@@ -3,31 +3,8 @@ using System.Text;
 
 namespace ShipmondoBackendAssignment;
 
-public class ShipmondoApiClient
+public class ShipmondoApiClient(HttpClient httpClient)
 {
-	private HttpClient httpClient;
-
-	private ShipmondoApiClient(string username, string apiKey)
-	{
-		httpClient = new HttpClient();
-		httpClient.BaseAddress = new Uri("https://sandbox.shipmondo.com/api/public/v3/");
-		
-		string apiToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + apiKey));
-		httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + apiToken);
-		httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-	}
-	
-	public static async Task<ShipmondoApiClient> FromApiCredentialsAsync(string username, string apiKey)
-	{
-		ShipmondoApiClient client = new(username, apiKey);
-		if (!await client.AreCredentialsValidAsync())
-		{
-			// The client object would be invalid, abort.
-			throw new Exception("Credentials are invalid");
-		}
-		return client;
-	}
-
 	/// <summary>
 	/// Is the provided credentials valid?
 	///
@@ -37,6 +14,6 @@ public class ShipmondoApiClient
 	{
 		HttpResponseMessage response = await httpClient.GetAsync("account");
 		// TODO: We should consider stricter checking here, as the API might return an HTML 404 page with response code 200.
-		return response.StatusCode == HttpStatusCode.OK;
+		return response.StatusCode == HttpStatusCode.OK; // We don't care about the response body, just that the request was successful.
 	}
 }

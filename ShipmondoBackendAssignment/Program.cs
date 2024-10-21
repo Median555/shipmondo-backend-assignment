@@ -6,6 +6,7 @@ using ShipmondoBackendAssignment.DB;
 using ShipmondoBackendAssignment.Services;
 using ShipmondoBackendAssignment.ShipmondoApi;
 using AccountBalance = ShipmondoBackendAssignment.DB.Models.AccountBalance;
+using Shipment = ShipmondoBackendAssignment.DB.Models.Shipment;
 
 ServiceCollection serviceCollection = new();
 serviceCollection.AddLogging(conf => conf.AddConsole().SetMinimumLevel(LogLevel.Debug));
@@ -28,6 +29,7 @@ serviceCollection.AddHttpClient<Client>((_, httpClient) =>
 	httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + apiToken);
 });
 serviceCollection.AddScoped<AccountService>();
+serviceCollection.AddScoped<ShipmentService>();
 ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
 // We use a general logger for the duration of the program.
@@ -68,8 +70,15 @@ else
 }
 
 // Update the account balance from the API.
-logger.LogInformation("Fetching current account balance");
-await accountService.SaveAccountBalanceLocallyAsync();
-logger.LogInformation("Updated balance: {Balance}", await accountService.GetLatestLocalBalanceAsync());
+logger.LogInformation("Current balance: {Balance}", await accountService.SaveAccountBalanceLocallyAsync());
+
+// Create a shipment.
+ShipmentService shipmentService = serviceProvider.GetRequiredService<ShipmentService>();
+logger.LogInformation("Creating shipment...");
+Shipment shipment = await shipmentService.CreateShipmentAsync();
+logger.LogInformation("Created shipment with id {ShipmentId} and package number {PackageNumber}", shipment.id, shipment.packageNumber);
+
+// Update after shipment is created.
+logger.LogInformation("Updated balance: {Balance}", await accountService.SaveAccountBalanceLocallyAsync());
 
 return 0;

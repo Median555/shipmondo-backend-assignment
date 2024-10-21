@@ -18,7 +18,7 @@ public class AccountService(ShipmondoDbContext db, Client apiClient)
 	/// <summary>
 	/// Get the current account balance from the API, and save it locally.
 	/// </summary>
-	public async Task SaveAccountBalanceLocallyAsync()
+	public async Task<AccountBalance> SaveAccountBalanceLocallyAsync()
 	{
 		ShipmondoApi.AccountBalance accountBalance = await apiClient.GetAccountBalanceAsync();
 		
@@ -29,5 +29,7 @@ public class AccountService(ShipmondoDbContext db, Client apiClient)
 			updateInstant = accountBalance.updatedAt
 		});
 		await db.SaveChangesAsync();
+		
+		return (await GetLatestLocalBalanceAsync())!;
 	}
 }

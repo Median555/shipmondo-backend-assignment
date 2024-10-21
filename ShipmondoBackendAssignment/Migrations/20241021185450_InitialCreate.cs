@@ -15,12 +15,15 @@ namespace ShipmondoBackendAssignment.Migrations
                 name: "AccountBalances",
                 columns: table => new
                 {
+                    sequenceId = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     amount = table.Column<decimal>(type: "TEXT", nullable: false),
                     currencyCode = table.Column<string>(type: "TEXT", nullable: false),
                     updateInstant = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
+                    table.PrimaryKey("PK_AccountBalances", x => x.sequenceId);
                 });
 
             migrationBuilder.CreateTable(

@@ -11,7 +11,7 @@ using ShipmondoBackendAssignment.DB;
 namespace ShipmondoBackendAssignment.Migrations
 {
     [DbContext(typeof(ShipmondoDbContext))]
-    [Migration("20241021160159_InitialCreate")]
+    [Migration("20241021185450_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -22,6 +22,10 @@ namespace ShipmondoBackendAssignment.Migrations
 
             modelBuilder.Entity("ShipmondoBackendAssignment.DB.Models.AccountBalance", b =>
                 {
+                    b.Property<int>("sequenceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("amount")
                         .HasColumnType("TEXT");
 
@@ -31,6 +35,8 @@ namespace ShipmondoBackendAssignment.Migrations
 
                     b.Property<DateTime>("updateInstant")
                         .HasColumnType("TEXT");
+
+                    b.HasKey("sequenceId");
 
                     b.HasIndex("updateInstant");
 

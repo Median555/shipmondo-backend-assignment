@@ -1,11 +1,19 @@
-using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace ShipmondoBackendAssignment.DB.Models;
 
-[Keyless]
 public class AccountBalance
 {
-	public decimal amount { get; set; } // TODO: Clarify if the "number" type mentioned in the API doc is compatible with decimal.
+	// This id is not used by Shipmondo, but is required by EF Core to track the entity.
+	[Key]
+	public int sequenceId { get; set; }
+	
+	public decimal amount { get; set; }
 	public string currencyCode { get; set; }
 	public DateTime updateInstant { get; set; }
+
+	public override string ToString()
+	{
+		return $"{amount} {currencyCode} ({updateInstant:g})";
+	}
 }

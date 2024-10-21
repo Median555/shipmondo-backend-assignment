@@ -19,6 +19,10 @@ namespace ShipmondoBackendAssignment.Migrations
 
             modelBuilder.Entity("ShipmondoBackendAssignment.DB.Models.AccountBalance", b =>
                 {
+                    b.Property<int>("sequenceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("amount")
                         .HasColumnType("TEXT");
 
@@ -28,6 +32,8 @@ namespace ShipmondoBackendAssignment.Migrations
 
                     b.Property<DateTime>("updateInstant")
                         .HasColumnType("TEXT");
+
+                    b.HasKey("sequenceId");
 
                     b.HasIndex("updateInstant");
 

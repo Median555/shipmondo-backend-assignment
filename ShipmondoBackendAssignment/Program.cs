@@ -2,15 +2,15 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using ShipmondoBackendAssignment;
 using ShipmondoBackendAssignment.DB;
-using ShipmondoBackendAssignment.DB.Models;
 using ShipmondoBackendAssignment.Services;
+using ShipmondoBackendAssignment.ShipmondoApi;
+using AccountBalance = ShipmondoBackendAssignment.DB.Models.AccountBalance;
 
 ServiceCollection serviceCollection = new();
-serviceCollection.AddLogging(conf => conf.AddConsole());
+serviceCollection.AddLogging(conf => conf.AddConsole().SetMinimumLevel(LogLevel.Debug));
 serviceCollection.AddDbContext<ShipmondoDbContext>();
-serviceCollection.AddHttpClient<ShipmondoApiClient>((_, httpClient) =>
+serviceCollection.AddHttpClient<Client>((_, httpClient) =>
 {
 	httpClient.BaseAddress = new Uri("https://sandbox.shipmondo.com/api/public/v3/");
 	httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
@@ -27,14 +27,14 @@ serviceCollection.AddHttpClient<ShipmondoApiClient>((_, httpClient) =>
 	string apiToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + apiKey));
 	httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + apiToken);
 });
-serviceCollection.AddScoped<AccountBalanceService>();
-
+serviceCollection.AddScoped<AccountService>();
 ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
-ILogger logger = serviceProvider.GetRequiredService<ILoggerFactory>()!.CreateLogger(typeof(Program));
+// We use a general logger for the duration of the program.
+ILogger logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(Program));
 
 // Check our credentials.
-if (!await serviceProvider.GetRequiredService<ShipmondoApiClient>().AreCredentialsValidAsync())
+if (!await serviceProvider.GetRequiredService<Client>().AreCredentialsValidAsync())
 {
 	// The client object would be invalid, abort.
 	logger.LogCritical("Credentials are invalid");
@@ -46,8 +46,9 @@ logger.LogInformation("API credentials are valid!");
 ShipmondoDbContext db = serviceProvider.GetService<ShipmondoDbContext>()!;
 if ((await db.Database.GetPendingMigrationsAsync()).Any())
 {
-	logger.LogDebug("Migrations pending...upgrading");
+	logger.LogDebug("Migrations pending, upgrading...");
 	await db.Database.MigrateAsync();
+	logger.LogDebug("DONE!");
 }
 else
 {
@@ -55,15 +56,20 @@ else
 }
 
 // Print latest account balance.
-AccountBalanceService accountBalanceService = serviceProvider.GetRequiredService<AccountBalanceService>();
-AccountBalance? latestBalance = await accountBalanceService.GetLatestBalanceAsync();
+AccountService accountService = serviceProvider.GetRequiredService<AccountService>();
+AccountBalance? latestBalance = await accountService.GetLatestLocalBalanceAsync();
 if (latestBalance is null)
 {
 	logger.LogInformation("No locally recorded account balance.");
 }
 else
 {
-	logger.LogInformation($"Latest account balance: {latestBalance.amount} {latestBalance.currencyCode} ({latestBalance.updateInstant:g})");
+	logger.LogInformation("Latest account balance: {Balance}", latestBalance);
 }
+
+// Update the account balance from the API.
+logger.LogInformation("Fetching current account balance");
+await accountService.SaveAccountBalanceLocallyAsync();
+logger.LogInformation("Updated balance: {Balance}", await accountService.GetLatestLocalBalanceAsync());
 
 return 0;

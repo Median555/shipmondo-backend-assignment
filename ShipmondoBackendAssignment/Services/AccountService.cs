@@ -12,8 +12,6 @@ public class AccountService(ShipmondoDbContext db, Client apiClient)
 	/// </summary>
 	public async Task<AccountBalance?> GetLatestLocalBalanceAsync()
 	{
-		await using ShipmondoDbContext db = new();
-		
 		return await db.AccountBalances.OrderByDescending(it => it.updateInstant).FirstOrDefaultAsync();
 	}
 	

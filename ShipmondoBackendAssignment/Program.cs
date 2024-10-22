@@ -10,7 +10,10 @@ using Shipment = ShipmondoBackendAssignment.DB.Models.Shipment;
 
 ServiceCollection serviceCollection = new();
 serviceCollection.AddLogging(conf => conf.AddConsole().SetMinimumLevel(LogLevel.Debug));
-serviceCollection.AddDbContext<ShipmondoDbContext>();
+serviceCollection.AddDbContext<ShipmondoDbContext>(conf =>
+{
+	conf.UseSqlite("Data Source=shipmondo.db");
+});
 serviceCollection.AddHttpClient<Client>((_, httpClient) =>
 {
 	httpClient.BaseAddress = new Uri("https://sandbox.shipmondo.com/api/public/v3/");

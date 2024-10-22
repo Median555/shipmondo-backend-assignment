@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace ShipmondoBackendAssignment.ShipmondoApi;
 
-public class Client(HttpClient httpClient)
+public class Client(HttpClient httpClient) : IShipmondoApiClient
 {
 	private readonly JsonSerializerOptions defaultOptions = new()
 	{
@@ -92,25 +92,4 @@ public class Client(HttpClient httpClient)
 		return await JsonSerializer.DeserializeAsync<Shipment>(await response.Content.ReadAsStreamAsync(), defaultOptions)
 		       ?? throw new Exception("Could not deserialize shipment");
 	}
-}
-
-/// <summary>
-/// Represents the account balance.
-/// POCO of https://sandbox.shipmondo.com/api/public/v3/specification#/operations/account_balance_get
-/// </summary>
-public class AccountBalance
-{
-	public decimal amount { get; set; } // TODO: Clarify if the "number" type mentioned in the API doc is compatible with decimal.
-	public string currencyCode { get; set; }
-	public DateTime updatedAt { get; set; }
-}
-
-/// <summary>
-/// Represents a shipment, but only the field we need for this assignment.
-/// POCO of https://sandbox.shipmondo.com/api/public/v3/specification#/operations/shipments_post
-/// </summary>
-public class Shipment
-{
-	public int id { get; set; }
-	public string pkgNo { get; set; }
 }

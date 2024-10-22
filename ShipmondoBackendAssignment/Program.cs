@@ -14,7 +14,7 @@ serviceCollection.AddDbContext<ShipmondoDbContext>(conf =>
 {
 	conf.UseSqlite("Data Source=shipmondo.db");
 });
-serviceCollection.AddHttpClient<Client>((_, httpClient) =>
+serviceCollection.AddHttpClient<IShipmondoApiClient, Client>((_, httpClient) =>
 {
 	httpClient.BaseAddress = new Uri("https://sandbox.shipmondo.com/api/public/v3/");
 	httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
@@ -39,7 +39,7 @@ ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 ILogger logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(Program));
 
 // Check our credentials.
-if (!await serviceProvider.GetRequiredService<Client>().AreCredentialsValidAsync())
+if (!await serviceProvider.GetRequiredService<IShipmondoApiClient>().AreCredentialsValidAsync())
 {
 	// The client object would be invalid, abort.
 	logger.LogCritical("Credentials are invalid");

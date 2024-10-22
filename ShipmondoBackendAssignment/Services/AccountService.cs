@@ -5,7 +5,7 @@ using AccountBalance = ShipmondoBackendAssignment.DB.Models.AccountBalance;
 
 namespace ShipmondoBackendAssignment.Services;
 
-public class AccountService(ShipmondoDbContext db, Client apiClient)
+public class AccountService(ShipmondoDbContext db, IShipmondoApiClient apiClient)
 {
 	/// <summary>
 	/// The latest account balance we have stored locally, or null if none exists.

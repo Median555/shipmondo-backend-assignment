@@ -5,7 +5,7 @@ using Shipment = ShipmondoBackendAssignment.DB.Models.Shipment;
 
 namespace ShipmondoBackendAssignment.Services;
 
-public class ShipmentService(ShipmondoDbContext db, Client apiClient)
+public class ShipmentService(ShipmondoDbContext db, IShipmondoApiClient apiClient)
 {
 	/// <summary>
 	/// Create a new shipment at Shipmondo, and save it locally.

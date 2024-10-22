@@ -48,7 +48,7 @@ if (!await serviceProvider.GetRequiredService<Client>().AreCredentialsValidAsync
 logger.LogInformation("API credentials are valid!");
 
 // Migrate DB if necessary.
-ShipmondoDbContext db = serviceProvider.GetService<ShipmondoDbContext>()!;
+ShipmondoDbContext db = serviceProvider.GetRequiredService<ShipmondoDbContext>();
 if ((await db.Database.GetPendingMigrationsAsync()).Any())
 {
 	logger.LogDebug("Migrations pending, upgrading...");

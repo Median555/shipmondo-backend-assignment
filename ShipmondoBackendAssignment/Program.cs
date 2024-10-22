@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ShipmondoBackendAssignment.DB;
@@ -8,25 +9,29 @@ using ShipmondoBackendAssignment.ShipmondoApi;
 using AccountBalance = ShipmondoBackendAssignment.DB.Models.AccountBalance;
 using Shipment = ShipmondoBackendAssignment.DB.Models.Shipment;
 
+IConfigurationRoot configuration = new ConfigurationBuilder()
+	.AddEnvironmentVariables()
+	.Build();
+
 ServiceCollection serviceCollection = new();
+serviceCollection.AddScoped<IConfiguration>(_ => configuration);
 serviceCollection.AddLogging(conf => conf.AddConsole().SetMinimumLevel(LogLevel.Debug));
 serviceCollection.AddDbContext<ShipmondoDbContext>(conf =>
 {
 	conf.UseSqlite("Data Source=shipmondo.db");
 });
-serviceCollection.AddHttpClient<IShipmondoApiClient, Client>((_, httpClient) =>
+serviceCollection.AddHttpClient<IShipmondoApiClient, Client>((serviceProvider, httpClient) =>
 {
 	httpClient.BaseAddress = new Uri("https://sandbox.shipmondo.com/api/public/v3/");
 	httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
 		
 	// Get configuration from environment variables.
+	IConfiguration configuration = serviceProvider.GetRequiredService<IConfiguration>();
 	const string applicationNamePrefix = "SBA";
 	const string usernameEnvVarName = applicationNamePrefix + "__username";
 	const string apiKeyEnvVarName = applicationNamePrefix + "__apikey";
-	string username = Environment.GetEnvironmentVariable(usernameEnvVarName)
-	                  ?? throw new Exception($"Please set you Shipmondo username in the \"{usernameEnvVarName}\" environment variable");
-	string apiKey = Environment.GetEnvironmentVariable(apiKeyEnvVarName)
-	                ?? throw new Exception($"Please set you Shipmondo API key in the \"{apiKeyEnvVarName}\" environment variable");
+	string username = configuration["SBA:username"] ?? throw new Exception($"Please set you Shipmondo username in the \"{usernameEnvVarName}\" environment variable");
+	string apiKey = configuration["SBA:apikey"] ?? throw new Exception($"Please set you Shipmondo API key in the \"{apiKeyEnvVarName}\" environment variable");
 		
 	string apiToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + apiKey));
 	httpClient.DefaultRequestHeaders.Add("Authorization", "Basic " + apiToken);

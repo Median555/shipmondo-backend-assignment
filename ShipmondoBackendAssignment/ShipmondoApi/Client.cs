@@ -45,7 +45,7 @@ public class Client(HttpClient httpClient)
 	public async Task<Shipment> CreateShipmentAsync()
 	{
 		// For this assignment, we are allowed to use a static dummy body.
-		string dummyBody = """
+		string staticBody = """
 		                   {
 		                     "own_agreement": false,
 		                     "label_format": "a4_pdf",
@@ -85,7 +85,7 @@ public class Client(HttpClient httpClient)
 
 		HttpResponseMessage response = await httpClient.PostAsync(
 			"shipments",
-			new StringContent(dummyBody, Encoding.UTF8, "application/json")
+			new StringContent(staticBody, Encoding.UTF8, "application/json")
 		);
 		response.EnsureSuccessStatusCode();
 

@@ -26,7 +26,7 @@ public class AccountService(ShipmondoDbContext db, Client apiClient)
 		{
 			amount = accountBalance.amount,
 			currencyCode = accountBalance.currencyCode,
-			updateInstant = accountBalance.updatedAt
+			updateInstant = accountBalance.updatedAt // Trust the API unilaterally.
 		});
 		await db.SaveChangesAsync();
 		
